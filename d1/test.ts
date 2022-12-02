@@ -1,7 +1,7 @@
 import { getNumberCalories } from "./lib";
 
-describe("Advent of code - day 1 - task 1", () => {
-  it("Should return total calories for elf with max num calories", () => {
+describe("Advent of code - day 1", () => {
+  it("Task 1 - should return total calories for elf with max num calories", () => {
     const input = `1000
 2000
 3000
@@ -22,7 +22,7 @@ describe("Advent of code - day 1 - task 1", () => {
 
     expect(actual).toEqual(expected);
   });
-  it("Should return total calories for three elves with max num calories", () => {
+  it("Task 2 - should return total calories for three elves with max num calories", () => {
     const input = `1000
 2000
 3000
