@@ -1,3 +1,6 @@
+const splitInputInLines = (input: string) =>
+  input.split("\n").map((line) => line.trim());
+
 const splitItems = (items: string) =>
   [items.slice(0, items.length / 2), items.slice(items.length / 2)] as const;
 
@@ -22,7 +25,7 @@ const getPoints = (char: string): number => {
 };
 
 export const getPrioritySum = (input: string) => {
-  const arr = input.split("\n");
+  const arr = splitInputInLines(input);
   const rucksack = arr.map((items) => splitItems(items));
   const repeatedItems = rucksack.map((items) => getRepeatedItem(...items));
   const pointArr = repeatedItems.map((item) => getPoints(item));
@@ -46,7 +49,7 @@ const splitRucksack = (
 };
 
 export const getPriorityBadge = (input: string) => {
-  const arr = input.split("\n");
+  const arr = splitInputInLines(input);
   const groupedRucksacks = splitRucksack(arr);
 
   const badges = groupedRucksacks.map((arrItems) =>

@@ -1,3 +1,6 @@
+const splitInputInLines = (input: string) =>
+  input.split("\n").map((line) => line.trim());
+
 const mapPlayerShape = (shape: string): string => {
   if (shape === "X") {
     return "A";
@@ -38,8 +41,9 @@ const getVictoryPoints = (shape1: string, shape2: string) => {
   return 0;
 };
 
-export const getPointsRockPaperScisors = (list: string): number => {
-  const arrPlays = list.split("\n").map((ls) => {
+export const getPointsRockPaperScisors = (input: string): number => {
+  const arr = splitInputInLines(input);
+  const arrPlays = arr.map((ls) => {
     const playPoints = ls.split(" ");
     return [playPoints[0], mapPlayerShape(playPoints[1])] as const;
   });
@@ -90,8 +94,9 @@ const getPlayerShape = (shape: string, outcome: string) => {
   return shape;
 };
 
-export const getPointsDecidedRockPaperScisors = (list: string): number => {
-  const arrPlays = list.split("\n").map((ls) => {
+export const getPointsDecidedRockPaperScisors = (input: string): number => {
+  const arr = splitInputInLines(input);
+  const arrPlays = arr.map((ls) => {
     const playPoints = ls.split(" ") as [string, string];
     return [playPoints[0], getPlayerShape(...playPoints)] as const;
   });
