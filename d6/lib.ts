@@ -1,9 +1,16 @@
-export const myFunctionTask1 = (input: string) => {
-  const arr = input.split("\n").map((line) => line.trim());
-  return input;
+const isMarker = (subStr: string, num: number): boolean => {
+  const set = new Set(subStr.split(""));
+
+  return set.size === num;
 };
 
-export const myFunctionTask2 = (input: string) => {
-  const arr = input.split("\n").map((line) => line.trim());
-  return input;
+export const getMarker = (input: string, num: number): number => {
+  for (let i = num; i < input.length; i++) {
+    const subStr = input.slice(i - num, i);
+
+    if (isMarker(subStr, num)) {
+      return i;
+    }
+  }
+  return 0;
 };
