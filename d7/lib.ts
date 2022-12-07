@@ -48,21 +48,19 @@ const addFile = (fs: FS, file: string) => {
   workDir[name] = fileData;
 };
 
-const performAction =
-  (fs: FS) =>
-  (inst: string): void => {
-    if (/^\$ cd /.test(inst)) {
-      const dir = inst.replace(/^\$ cd /, "");
-      moveDir(fs, dir);
-      return;
-    }
-
-    if (/^[^$]/.test(inst)) {
-      addFile(fs, inst);
-      return;
-    }
+const performAction = (fs: FS, inst: string): void => {
+  if (/^\$ cd /.test(inst)) {
+    const dir = inst.replace(/^\$ cd /, "");
+    moveDir(fs, dir);
     return;
-  };
+  }
+
+  if (/^[^$]/.test(inst)) {
+    addFile(fs, inst);
+    return;
+  }
+  return;
+};
 
 type Sizes = {
   [key: string]: number;
@@ -90,24 +88,13 @@ const getAllDirSizes = (dir: Files) => {
   return sizes;
 };
 
-const getDirWithSpecificSize = (
-  sizes: Sizes
-): { dirs: string[]; total: number } => {
+const getTotalSizeDirsOverLimit = (sizes: Sizes): number => {
   const limit = 100000;
-  const res = {
-    dirs: [] as string[],
-    total: 0,
-  };
 
-  Object.entries(sizes).forEach(([name, size]) => {
-    if (size > limit) {
-      return;
-    }
-    res.dirs.push(name);
-    res.total += size;
-  });
-
-  return res;
+  return Object.values(sizes).reduce(
+    (sum, size) => (size <= limit ? sum + size : sum),
+    0
+  );
 };
 
 const getPrintStrings = (files: Files, prefix = "-", printInfo: string[]) => {
@@ -130,38 +117,27 @@ const printFiles = (files: Files) => {
   console.log(printInfo.join("\n"));
 };
 
-const checkDuplicates = (files: Files): boolean => {
-  const allFileNames = Object.keys(files);
-  const uniqueNames = new Set(allFileNames);
+const getFolderSizesOfNewFS = (instructions: string[]) => {
+  const localFS = createFS();
 
-  let areDuplicates = allFileNames.length !== uniqueNames.size;
-
-  Object.values(files).forEach((file) => {
-    if (typeof file !== "number" && checkDuplicates(file)) {
-      areDuplicates = true;
-    }
+  instructions.forEach((inst) => {
+    performAction(localFS, inst);
   });
-  return areDuplicates;
+
+  printFiles(localFS.files);
+
+  return getAllDirSizes(localFS.files);
 };
 
 export const getTotalSizeSmallDirectories = (input: string) => {
-  const localFS = createFS();
-  const instructrions = input.split("\n").map((line) => line.trim());
+  const instructions = input.split("\n").map((line) => line.trim());
 
-  instructrions.forEach((inst) => {
-    performAction(localFS)(inst);
-  });
+  const sizes = getFolderSizesOfNewFS(instructions);
 
-  const sizes: Sizes = getAllDirSizes(localFS.files);
-
-  // printFiles(localFS.files);
-
-  const res = getDirWithSpecificSize(sizes);
-
-  return res.total;
+  return getTotalSizeDirsOverLimit(sizes);
 };
 
-const getMinSizeToDelete = (sizes: Sizes) => {
+const getSpaceToFree = (sizes: Sizes) => {
   const totalUsedSpace = sizes["/"];
   const requiredSpace = 30000000;
   const totalSpace = 70000000;
@@ -182,16 +158,11 @@ const getFolderToDelete = (sizes: Sizes, limit: number) => {
 };
 
 export const getSizeDirToDelete = (input: string) => {
-  const localFS = createFS();
-  const instructrions = input.split("\n").map((line) => line.trim());
+  const instructions = input.split("\n").map((line) => line.trim());
 
-  instructrions.forEach((inst) => {
-    performAction(localFS)(inst);
-  });
+  const sizes = getFolderSizesOfNewFS(instructions);
 
-  const sizes: Sizes = getAllDirSizes(localFS.files);
-
-  const spaceToFree = getMinSizeToDelete(sizes);
+  const spaceToFree = getSpaceToFree(sizes);
 
   const folder = getFolderToDelete(sizes, spaceToFree);
 
