@@ -1,9 +1,9 @@
-import { myFunctionTask2 } from "./lib";
+import { getMostScenicTree } from "./lib";
 import path from "node:path";
 import fs from "node:fs";
 
 const input = fs.readFileSync(path.join(__dirname, "input.txt"), "utf-8");
 
-const result = myFunctionTask2(input);
+const result = getMostScenicTree(input);
 
 console.log(result);
