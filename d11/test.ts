@@ -29,14 +29,14 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1`;
 
-  it.only("Task 1 - should return correct total ", () => {
+  it("Task 1 - should return correct total ", () => {
     const actual = getMonkeyBusiness(input, 20, true);
     const expected = 10605;
 
     expect(actual).toEqual(expected);
   });
-  it("Task 2 - should return correct total ", () => {
-    const actual = getMonkeyBusiness(input, 1000, false);
+  it.only("Task 2 - should return correct total ", () => {
+    const actual = getMonkeyBusiness(input, 20, false);
     const expected = 2713310158;
 
     expect(actual).toEqual(expected);
