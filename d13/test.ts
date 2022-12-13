@@ -31,7 +31,7 @@ describe("Advent of code - day 4", () => {
 
     expect(actual).toEqual(expected);
   });
-  it("Task 2 - should return correct total ", () => {
+  it("Task 2 - should return correct total multiplication of receivers indexes", () => {
     const actual = getReceiverSignal(input);
     const expected = 140;
 
