@@ -15,6 +15,7 @@ type Game = {
   scanned: Scanned;
   equipment: Scanned;
   offset: { x: number; y: number };
+  searchArea: { x: number; y: number };
 };
 
 const printBoard = (board: Board) => {
@@ -50,7 +51,7 @@ const getSeonsorsAndBeacons = (arr: string[]): Info[] =>
     };
   });
 
-const createGame = (arr: Info[], row: number): Game => {
+const createGame = (arr: Info[], row: number, withSearch: boolean): Game => {
   const minX = Math.min(...arr.map((info) => info.limits.minX));
   const maxX = Math.max(...arr.map((info) => info.limits.maxX));
   const minY = Math.min(...arr.map((info) => info.limits.minY));
@@ -58,6 +59,10 @@ const createGame = (arr: Info[], row: number): Game => {
   const lengthX = maxX - minX + 1;
 
   const offset = { x: minX, y: minY };
+  const searchArea = {
+    x: Math.min(Math.max(...arr.map((info) => info.sensor[0])), 4000000),
+    y: Math.min(Math.max(...arr.map((info) => info.sensor[1])), 4000000),
+  };
 
   const board: Board = Array(lengthX).fill(null);
 
@@ -65,24 +70,41 @@ const createGame = (arr: Info[], row: number): Game => {
   const scanned = new Set<number>();
 
   arr.forEach((info) => {
-    for (let x = -info.manhattan; x <= info.manhattan; x++) {
+    for (
+      let x = withSearch
+        ? Math.max(info.sensor[0] - info.manhattan, 0)
+        : info.sensor[0] - info.manhattan;
+      x <=
+      (withSearch
+        ? Math.min(info.sensor[0] + info.manhattan, searchArea.x)
+        : info.sensor[0] + info.manhattan);
+      x++
+    ) {
       if (
-        -info.manhattan + Math.abs(x) + info.sensor[1] <= row &&
-        info.manhattan - Math.abs(x) + info.sensor[1] >= row
+        -info.manhattan + Math.abs(x - info.sensor[0]) + info.sensor[1] <=
+          row &&
+        info.manhattan - Math.abs(x - info.sensor[0]) + info.sensor[1] >= row
       ) {
-        const xval = x + info.sensor[0];
-        if (!equipment.has(xval)) {
-          scanned.add(xval);
+        if (!equipment.has(x)) {
+          scanned.add(x);
         }
       }
     }
 
-    if (info.sensor[1] === row) {
+    if (
+      info.sensor[1] === row &&
+      info.sensor[0] <= searchArea.x &&
+      info.sensor[0] >= 0
+    ) {
       scanned.delete(info.sensor[0]);
       equipment.add(info.sensor[0]);
     }
 
-    if (info.beacon[1] === row) {
+    if (
+      info.beacon[1] === row &&
+      info.beacon[0] <= searchArea.x &&
+      info.beacon[0] >= 0
+    ) {
       scanned.delete(info.beacon[0]);
       equipment.add(info.beacon[0]);
     }
@@ -93,21 +115,48 @@ const createGame = (arr: Info[], row: number): Game => {
     offset,
     scanned,
     equipment,
+    searchArea,
   };
-};
-
-const getRowCount = (game: Game) => {
-  return game.board.filter((equip) => equip === "#").length;
 };
 
 export const getBeaconPositionFree = (input: string, row: number) => {
   const arr = input.split("\n").map((line) => line.trim());
   const equipment = getSeonsorsAndBeacons(arr);
-  const game = createGame(equipment, row);
+  const game = createGame(equipment, row, false);
   return game.scanned.size;
 };
 
-export const myFunctionTask2 = (input: string) => {
+const getPossibility = (game: Game) => {
+  const usedLength = game.scanned.size + game.equipment.size;
+  const searchLength = game.searchArea.x + 1;
+  return searchLength - usedLength;
+};
+
+const getDistressSignalValue = (equipment: Info[]) => {
+  for (
+    let row = 0;
+    row <=
+    Math.min(Math.max(...equipment.map((info) => info.sensor[1])), 4000000);
+    row++
+  ) {
+    const game = createGame(equipment, row, true);
+
+    if (getPossibility(game) > 0) {
+      const y = row;
+      const rowValues = new Set([...game.scanned, ...game.equipment]);
+
+      for (let x = 0; x <= game.searchArea.x; x++) {
+        if (!rowValues.has(x)) {
+          return x * 4000000 + y;
+        }
+      }
+    }
+  }
+  return 0;
+};
+
+export const getDistressSignal = (input: string) => {
   const arr = input.split("\n").map((line) => line.trim());
-  return input;
+  const equipment = getSeonsorsAndBeacons(arr);
+  return getDistressSignalValue(equipment);
 };
