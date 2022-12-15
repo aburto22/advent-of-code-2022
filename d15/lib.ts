@@ -66,16 +66,13 @@ const createGame = (arr: Info[], row: number): Game => {
 
   arr.forEach((info) => {
     for (let x = -info.manhattan; x <= info.manhattan; x++) {
-      for (
-        let y = -info.manhattan + Math.abs(x) + info.sensor[1];
-        y <= info.manhattan - Math.abs(x) + info.sensor[1];
-        y++
+      if (
+        -info.manhattan + Math.abs(x) + info.sensor[1] <= row &&
+        info.manhattan - Math.abs(x) + info.sensor[1] >= row
       ) {
-        if (y === row) {
-          const xval = x + info.sensor[0];
-          if (!equipment.has(xval)) {
-            scanned.add(xval);
-          }
+        const xval = x + info.sensor[0];
+        if (!equipment.has(xval)) {
+          scanned.add(xval);
         }
       }
     }
